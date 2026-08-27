@@ -1,0 +1,47 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+
+# test / coverage
+coverage/
+.vitest/
+
+# SII local state — NEVER commit (mirrors sii-py ~/.sii/ discipline, ADR-004)
+.sii/
+*.pfx
+*.p12
+
+# secrets / env
+.env
+.env.*
+!.env.example
+
+# Local data exports that must NEVER be committed. A mail archive or a ledger dump in the working
+# tree is PII by definition; `.git/info/exclude` is per-clone and does not travel, so the rule
+# lives here where every clone gets it.
+*.mbox
+*.mbox.*
+
+# logs
+*.log
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# local working doc — status is managed locally, not versioned
+docs/CURRENT_STATUS.md
+
+# Crawler raw captures (ADR-040) — real SII page content, may carry real taxpayer data. Never
+# committed; only a human-reviewed summary graduates into docs/ESTADO-CONSOLIDADO.md.
+tools/crawler/out/
+
+# graphify output — regenerable cache/analysis artifacts (`/graphify . --update` rebuilds), not
+# curated source or docs.
+graphify-out/

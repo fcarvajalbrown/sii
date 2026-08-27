@@ -1,0 +1,26 @@
+{
+  "name": "@dostertags/sii-auditor",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bucle nocturno de auditoría (ADR-043): ingesta con procedencia, extracción medida, normativa citable, reglas como datos y una compuerta de regresión que gobierna toda promoción.",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "bin": {
+    "sii-auditor": "./dist/loop/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "fetch": "node dist/loop/cli.js fetch",
+    "nightly": "node dist/loop/cli.js learn",
+    "nightly:dry": "node dist/loop/cli.js learn --dry-run",
+    "nightly:all": "node dist/loop/cli.js run"
+  },
+  "dependencies": {
+    "@dostertags/sii-core": "workspace:*"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

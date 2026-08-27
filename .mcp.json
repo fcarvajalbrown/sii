@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "sii": {
+      "type": "stdio",
+      "command": "sii-mcp",
+      "args": [],
+      "env": {}
+    }
+  }
+}

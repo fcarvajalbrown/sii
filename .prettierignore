@@ -1,0 +1,17 @@
+**/dist/**
+node_modules/**
+pnpm-lock.yaml
+# Local data dumps that may sit in the working tree. Prettier walks the whole directory and
+# HARD-FAILS on files over 2 GiB (a mail export broke `pnpm format:check` this way), so exclude
+# them by extension rather than relying on nobody ever leaving one here.
+*.mbox
+*.mbox.*
+*.csv
+*.xlsx
+# CFD docs + slash commands keep their hand-authored formatting (markdownlint owns them)
+docs/**
+*.md
+.claude/**
+
+# Makefile has no prettier parser (nightly loop entry point, ADR-043)
+Makefile

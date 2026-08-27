@@ -1,0 +1,52 @@
+{
+  "name": "@dostertags/sii-cli",
+  "version": "0.6.0",
+  "type": "module",
+  "description": "CLI for Chile's SII (tax authority): authenticated reads of RCV, F29, F22, boletas de honorarios, DTE-authorized, and peticiones administrativas. Each command is a thin call into @dostertags/sii-core tasks (ADR-003).",
+  "keywords": [
+    "sii",
+    "chile",
+    "impuestos",
+    "sii-cl",
+    "tax",
+    "cli",
+    "rcv",
+    "f29",
+    "f22",
+    "dte"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/dostertags/sii#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dostertags/sii.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/dostertags/sii/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "bin": {
+    "sii": "./dist/main.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@dostertags/sii-core": "workspace:^",
+    "commander": "^12.1.0",
+    "playwright": "^1.49.0"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "prepack": "tsc -b --clean && tsc -b"
+  }
+}

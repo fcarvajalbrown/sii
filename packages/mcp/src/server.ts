@@ -1,0 +1,243 @@
+// The `sii` MCP stdio server (ADR-003): every Resource/Tool is a thin call into a
+// @dostertags/sii-core task — it never reaches past the task layer. The Clave NEVER crosses
+// this boundary: auth_login delegates to the browser flow and takes no password
+// argument (ADR-006). consoleLogin is deliberately unreachable here — it lives in
+// the CLI-only `@dostertags/sii-core/cli` subpath, which this package never imports.
+import { createRequire } from 'node:module';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
+import {
+  HOSTS,
+  authStatus,
+  describeOperating,
+  formatOperableEntry,
+  formatRut as fmt,
+  listOperable,
+  login,
+  logout,
+  operate,
+  operateSelf,
+  operatingStatus,
+  statusRefresh,
+  type Runtime,
+} from '@dostertags/sii-core';
+import { toolText } from './tool-helpers.js';
+// Domain read surfaces — each module owns a tools/<mod>.ts register fn (append-only).
+import { registerWhoamiTools } from './tools/whoami.js';
+import { registerRcvTools } from './tools/rcv.js';
+import { registerF22Tools } from './tools/f22.js';
+import { registerF29Tools } from './tools/f29.js';
+import { registerDteTools } from './tools/dte.js';
+import { registerAcuseTools } from './tools/acuse.js';
+import { registerBteTools } from './tools/bte.js';
+import { registerBpstTools } from './tools/bpst.js';
+import { registerDjTools } from './tools/dj.js';
+import { registerNotificacionesTools } from './tools/notificaciones.js';
+import { registerCarpetaTools } from './tools/carpeta.js';
+import { registerGirosTools } from './tools/giros.js';
+import { registerSituacionTools } from './tools/situacion.js';
+import { registerPeticionesTools } from './tools/peticiones.js';
+import { registerIvaTools } from './tools/iva.js';
+import { registerRentaTools } from './tools/renta.js';
+import { registerHonorariosTools } from './tools/honorarios.js';
+import { registerMonitorTools } from './tools/monitor.js';
+import { registerBancarioTools } from './tools/bancario.js';
+import { registerProfileTools } from './tools/profile.js';
+
+const jsonResource = (uri: URL, value: unknown) => ({
+  contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify(value, null, 2) }],
+});
+
+// The published version, read from this package's own package.json at runtime (one
+// level up from dist/) so the MCP handshake reports the real release, never drifting.
+const pkgVersion = (createRequire(import.meta.url)('../package.json') as { version: string })
+  .version;
+
+/** Build the MCP server over an injected Runtime (tests pass fakes; no SII). */
+/** Server options. `allowWrites` gates the state-changing tools (ADR-026) and defaults to FALSE:
+ *  an LLM-callable tool that issues legally-binding documents cannot be secured by any
+ *  argument-shaped check, so the safe default is for it not to be registered at all. */
+export interface ServerOptions {
+  readonly allowWrites?: boolean;
+}
+
+export function buildServer(runtime: Runtime, options: ServerOptions = {}): McpServer {
+  const allowWrites = options.allowWrites === true;
+  const server = new McpServer({ name: 'sii', version: pkgVersion });
+
+  // --- Resources: read-only context the model reads to orient (ROADMAP) ---
+  server.registerResource(
+    'session',
+    'sii://session',
+    {
+      title: 'Sesión SII',
+      description: 'Estado LOCAL de la sesión (autenticado, RUT, fuente). No toca el portal.',
+      mimeType: 'application/json',
+    },
+    async (uri) => jsonResource(uri, await authStatus(runtime)),
+  );
+
+  server.registerResource(
+    'operating',
+    'sii://operating',
+    {
+      title: 'Operando como',
+      description:
+        'RUT operativo actual (tú mismo o una empresa representada). null si no hay sesión.',
+      mimeType: 'application/json',
+    },
+    async (uri) => jsonResource(uri, await operatingStatus(runtime)),
+  );
+
+  server.registerResource(
+    'operable',
+    'sii://operable',
+    {
+      title: 'Conjunto operable',
+      description:
+        'RUT que la cuenta puede operar (tú mismo + empresas representadas). null si no hay sesión.',
+      mimeType: 'application/json',
+    },
+    async (uri) => jsonResource(uri, await listOperable(runtime)),
+  );
+
+  server.registerResource(
+    'config',
+    'sii://config',
+    {
+      title: 'Configuración SII',
+      description: 'Hostnames de producción del SII (única fuente de verdad, ADR-004).',
+      mimeType: 'application/json',
+    },
+    async (uri) => jsonResource(uri, HOSTS),
+  );
+
+  // --- Tools: actions, each a thin call into a @dostertags/sii-core task ---
+  // NOTE: auth_login can block up to the browser-login budget (~180s) while the
+  // user types the Clave into SII's page. Some MCP clients enforce a shorter
+  // tool-call timeout — confirm/tune the budget when live-validating in Claude
+  // Desktop (a credential-free, CLI-only fast path stays out of MCP by design).
+  server.registerTool(
+    'auth_login',
+    {
+      title: 'Iniciar sesión (navegador)',
+      description:
+        'Abre el navegador en la página del SII para que el usuario escriba su Clave Tributaria. ' +
+        'NUNCA recibe la Clave como argumento (ADR-006); persiste solo cookies. Idempotente sobre una sesión viva.',
+      annotations: { readOnlyHint: false, openWorldHint: true },
+    },
+    () =>
+      toolText(async () => {
+        const r = await login(runtime);
+        return r.reason === 'already_authenticated'
+          ? `Ya tienes una sesión activa como ${fmt(r.rut)}.`
+          : `Sesión iniciada como ${fmt(r.rut)}.`;
+      }),
+  );
+
+  server.registerTool(
+    'auth_status',
+    {
+      title: 'Estado de sesión',
+      description:
+        'Lectura LOCAL de la sesión (quién soy, operando-como). refresh=true lee la identidad desde el portal (requiere sesión viva).',
+      inputSchema: { refresh: z.boolean().optional() },
+      annotations: { readOnlyHint: true },
+    },
+    ({ refresh }) =>
+      toolText(async () => {
+        if (refresh) {
+          const id = await statusRefresh(runtime);
+          return `RUT: ${fmt(id.rut)}\nNombre: ${id.nombre ?? '—'}\nTipo: ${id.accountType}`;
+        }
+        const s = await authStatus(runtime);
+        if (!s.authenticated || !s.rut) return 'No autenticado. Usa la tool auth_login.';
+        const ctx = await operatingStatus(runtime);
+        const op = ctx && !ctx.isSelf ? `\n${describeOperating(ctx)}` : '';
+        return `Autenticado (sesión local) como ${fmt(s.rut)}.${op}`;
+      }),
+  );
+
+  // logout carries NO secret, so ADR-006 does not bar it from MCP. It is still a REAL
+  // state change against SII (a best-effort server-side session close) plus a local wipe of
+  // the session and the operate state — and it is the one write that used to survive
+  // allowWrites=false. An injected instruction arriving through any read surface could end
+  // the user's session mid-task. Same reasoning as bte_emit (ADR-026): an argument-shaped
+  // gate cannot secure an LLM-callable state change, so the tool is ABSENT unless the
+  // operator opted in. Humans switch accounts with the CLI (`sii auth logout`).
+  if (allowWrites) {
+  server.registerTool(
+    'auth_logout',
+    {
+      title: 'Cerrar sesión',
+      description:
+        'Cierra la sesión: intenta cerrarla en el servidor (mejor esfuerzo) y borra las cookies locales. ' +
+        'No recibe argumentos. Para cambiar de cuenta: auth_logout y luego auth_login.',
+      // Touches SII: the best-effort server-side close is a real portal call (like auth_login).
+      annotations: { readOnlyHint: false, openWorldHint: true },
+    },
+    () =>
+      toolText(async () => {
+        const r = await logout(runtime);
+        if (!r.loggedOut) return 'No había sesión activa.';
+        return r.serverClosed ? 'Sesión cerrada (servidor y local).' : 'Sesión cerrada (local).';
+      }),
+  );
+  }
+
+  server.registerTool(
+    'operate',
+    {
+      title: 'Operar como',
+      description:
+        'Selecciona el RUT bajo el que operas: una empresa representada (rut) o tú mismo (self=true). ' +
+        'list=true LISTA los RUT que puedes operar (tú mismo + empresas representadas). ' +
+        'Validado contra el conjunto operable. Sin argumentos, reporta el contexto actual.',
+      inputSchema: {
+        rut: z.string().optional(),
+        self: z.boolean().optional(),
+        list: z.boolean().optional(),
+      },
+      annotations: { readOnlyHint: false },
+    },
+    ({ rut, self, list }) =>
+      toolText(async () => {
+        if (list) {
+          const result = await listOperable(runtime);
+          if (!result) return 'No hay sesión activa. Usa la tool auth_login.';
+          return result.operable.map((e) => formatOperableEntry(e, result.operatingRut)).join('\n');
+        }
+        if (self) {
+          const r = await operateSelf(runtime);
+          return describeOperating(r.context);
+        }
+        if (rut) return describeOperating((await operate(runtime, rut)).context);
+        const ctx = await operatingStatus(runtime);
+        return ctx ? describeOperating(ctx) : 'No hay sesión activa. Usa la tool auth_login.';
+      }),
+  );
+
+  // --- domain read surfaces (one register call per module — append-only) ---
+  registerWhoamiTools(server, runtime);
+  registerRcvTools(server, runtime);
+  registerF22Tools(server, runtime);
+  registerF29Tools(server, runtime);
+  registerDteTools(server, runtime);
+  registerAcuseTools(server, runtime);
+  registerBteTools(server, runtime, allowWrites);
+  registerBpstTools(server, runtime);
+  registerDjTools(server, runtime);
+  registerNotificacionesTools(server, runtime);
+  registerCarpetaTools(server, runtime);
+  registerGirosTools(server, runtime);
+  registerSituacionTools(server, runtime);
+  registerPeticionesTools(server, runtime);
+  registerIvaTools(server, runtime);
+  registerRentaTools(server, runtime);
+  registerHonorariosTools(server, runtime);
+  registerMonitorTools(server, runtime);
+  registerBancarioTools(server, runtime);
+  registerProfileTools(server, runtime);
+
+  return server;
+}

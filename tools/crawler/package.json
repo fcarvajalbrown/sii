@@ -1,0 +1,15 @@
+{
+  "name": "@dostertags/sii-crawler",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Herramienta de reconocimiento (ADR-040): crawler de SOLO LECTURA sobre superficies SII + resumen local con Llama 3.1 (Ollama). NO es una fachada de producción — no la consumen CLI ni MCP.",
+  "scripts": {
+    "build": "tsc -b",
+    "crawl": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@dostertags/sii-core": "workspace:*",
+    "playwright": "^1.49.0"
+  }
+}

@@ -1,0 +1,189 @@
+import type { LoginDestination } from '../config/index.js';
+
+// Injectable seams (ADR-003): the external / non-deterministic dependencies the
+// core reaches through interfaces. Node defaults live in adapters/node; in-memory
+// fakes for tests live in adapters/fake. The core never imports Playwright, fs,
+// or a keyring directly — only these interfaces.
+
+export interface Clock {
+  now(): Date;
+  /** Pause for `ms` (the pacing primitive for multi-call fan-outs — rate-limit
+   *  convention, ADR-004). Fakes resolve instantly so tests don't wait. */
+  sleep(ms: number): Promise<void>;
+}
+
+/** One audit receipt line. The audit module stamps `ts` and drops secret keys. */
+export interface AuditEntry {
+  readonly action: string;
+  readonly result: string;
+  readonly rut?: string;
+  readonly rutAuth?: string;
+  readonly durationMs?: number;
+  readonly [extra: string]: unknown;
+}
+
+export interface AuditSink {
+  record(entry: AuditEntry): void;
+}
+
+/** Namespaced local JSON store. Modules use DISTINCT keys (ADR-007) so they never
+ *  write the same file: `auth` → 'session', `identity` → 'operate'. */
+export interface KeyValueStore {
+  read<T>(key: string): Promise<T | null>;
+  write<T>(key: string, value: T): Promise<void>;
+  delete(key: string): Promise<void>;
+}
+
+/** OS secure storage for the optional credential path (ADR-006 / ADR-008).
+ *  Declared now; no Node adapter until the keyring increment. */
+export interface SecretStore {
+  get(account: string): Promise<string | null>;
+  set(account: string, secret: string): Promise<void>;
+  delete(account: string): Promise<void>;
+}
+
+/** A logged-in browser context (cookies loaded). All portal reads go through
+ *  here, so the core never imports Playwright. */
+export interface JsonRequest {
+  readonly method?: 'GET' | 'POST';
+  readonly headers?: Record<string, string>;
+  /** JSON-serialisable request body (sent as the POST payload). */
+  readonly body?: unknown;
+}
+
+/** An AUTHENTICATED `x-www-form-urlencoded` request from the session (cookies ride
+ *  along). The primitive behind the legacy HTML form-POST write flows — BHE emission
+ *  (`loa.sii.cl` `TMBECN_*` CGIs, ADR-017) — which return HTML, not JSON. The
+ *  authenticated peer of `PublicRequest.form` (which is session-less). */
+export interface FormRequest {
+  readonly method?: 'GET' | 'POST';
+  readonly headers?: Record<string, string>;
+  readonly form?: Record<string, string>;
+}
+
+/** An AUTHENTICATED raw-body request from the session (cookies ride along). The primitive
+ *  behind GWT-RPC read facades (SISPAD peticiones, ADR-020): the body is an opaque string
+ *  (a `text/x-gwt-rpc` payload) and the response is text (`//OK[…]`), neither JSON nor
+ *  urlencoded/HTML. The authenticated, arbitrary-content-type peer of `requestPublic`. The
+ *  facade sets `Content-Type` (+ `X-GWT-Module-Base`) via `headers`. */
+export interface TextRequest {
+  readonly method?: 'GET' | 'POST';
+  readonly headers?: Record<string, string>;
+  /** Raw request body, sent verbatim (e.g. the GWT-RPC stream). Omit for GET. */
+  readonly body?: string;
+}
+
+/** An AUTHENTICATED raw-binary GET from the session (cookies ride along). The primitive behind
+ *  binary downloads (a PDF of a carta/notificación, ADR-042) — the body is NEVER text-decoded
+ *  (unlike `requestForm`/`requestText`), so a binary payload survives intact. */
+export interface BinaryRequest {
+  readonly method?: 'GET' | 'POST';
+  readonly headers?: Record<string, string>;
+}
+
+export interface BinaryResponse {
+  readonly status: number;
+  /** Raw response bytes — NEVER passed through a text decoder (ADR-042). */
+  readonly body: Buffer;
+  /** The `Content-Type` header verbatim, or null if absent. NOT parsed for a charset — that
+   *  concept doesn't apply to a binary payload. */
+  readonly contentType: string | null;
+}
+
+export interface PortalSession {
+  /** Navigate; returns the URL actually landed on (for URL-based auth detection). */
+  goto(url: string): Promise<string>;
+  /** Evaluate a JS expression in the page; returns its JSON-serialisable result. */
+  evaluate<T>(expression: string): Promise<T>;
+  /** Issue an authenticated JSON request from the session's browser context (the
+   *  session cookies are sent automatically). The primitive behind the SII SPA
+   *  JSON facades (the `www4.sii.cl` SDI endpoints — RCV, representación, …).
+   *  Resolves the parsed JSON body; rejects on a non-JSON response. */
+  requestJson(url: string, options?: JsonRequest): Promise<unknown>;
+  /** Issue an authenticated FORM POST (`x-www-form-urlencoded`) from the session and
+   *  return the decoded text body (charset-aware). The primitive behind the legacy
+   *  HTML write flows — BHE emission (ADR-017) — where the CGI returns HTML, not JSON.
+   *  Login-wall detection is URL-based (landing on `LOGIN_HOST`) → `SessionExpiredError`,
+   *  since an HTML body is EXPECTED here (unlike `requestJson`). */
+  requestForm(url: string, options?: FormRequest): Promise<PublicResponse>;
+  /** Issue an authenticated raw-body request from the session and return the decoded
+   *  text body (charset-aware). The primitive behind GWT-RPC read facades (SISPAD
+   *  peticiones, ADR-020) — a `text/x-gwt-rpc` POST returning `//OK[…]`. Login-wall
+   *  detection is URL-based (landing on `LOGIN_HOST`) → `SessionExpiredError`, since a
+   *  non-JSON body is EXPECTED (unlike `requestJson`). */
+  requestText(url: string, options?: TextRequest): Promise<PublicResponse>;
+  /** Issue an authenticated raw-binary GET from the session and return the RAW bytes (never
+   *  text-decoded). The primitive behind binary downloads — a PDF of a carta/notificación
+   *  (ADR-042). Login-wall detection is URL-based (landing on `LOGIN_HOST`) → `SessionExpiredError`,
+   *  same convention as `requestForm`/`requestText` (a binary body is EXPECTED, not a login-wall
+   *  signal). */
+  requestBinary(url: string, options?: BinaryRequest): Promise<BinaryResponse>;
+  /** Value of a cookie visible to `url` (e.g. the SPA conversation `TOKEN`), or
+   *  null. Used to seed SDI request metadata. */
+  cookie(url: string, name: string): Promise<string | null>;
+  /** The cookies-only storage state to persist. */
+  storageState(): Promise<unknown>;
+  close(): Promise<void>;
+}
+
+/** An UNAUTHENTICATED public request (no session, no cookies). The basis for
+ *  login-free consultas — the DTE-authorized public CGI (ADR-014). */
+export interface PublicRequest {
+  readonly method?: 'GET' | 'POST';
+  readonly headers?: Record<string, string>;
+  /** `application/x-www-form-urlencoded` fields (the palena CGI takes form input). */
+  readonly form?: Record<string, string>;
+}
+
+export interface PublicResponse {
+  readonly status: number;
+  /** Decoded text body — the adapter decodes per the response's DECLARED charset
+   *  (the DTE report is `text/html; charset=ISO-8859-1`), so accents survive. */
+  readonly body: string;
+}
+
+export interface InteractiveLoginOptions {
+  /** Post-login destination passed to the login URL. A CLOSED union, not `string`: the login URL
+   *  carries it as an UNKEYED query that cannot be percent-encoded, so the type is the only
+   *  place a caller-supplied value can be refused (code review F-08). Type-only import — no
+   *  runtime coupling between the seam contract and config. */
+  readonly destination: LoginDestination;
+  /** Give up if the user hasn't landed off LOGIN_HOST within this budget (ms). */
+  readonly timeoutMs: number;
+}
+
+export interface CredentialLoginOptions {
+  /** Full RUT to type into the login form (`<body>-<DV>`); the page JS splits it. */
+  readonly rut: string;
+  /** The Clave Tributaria — used ONCE to fill the form, never persisted (ADR-010). */
+  readonly clave: string;
+  /** Post-login destination passed to the login URL (closed union — see above). */
+  readonly destination: LoginDestination;
+  /** Give up if we haven't landed off LOGIN_HOST within this budget (ms). */
+  readonly timeoutMs: number;
+}
+
+export interface PortalDriver {
+  /** Open a HEADED browser at the login URL; resolve with a session once the user
+   *  lands off LOGIN_HOST. Rejects (LoginFailedError) on timeout / window close. */
+  interactiveLogin(options: InteractiveLoginOptions): Promise<PortalSession>;
+  /** HEADLESS console login (ADR-010): fill the real SII form with RUT + Clave and
+   *  submit, resolving a session once landed off LOGIN_HOST. The Clave is used here
+   *  and never stored (cookies-only result). CLI-only — never wired into MCP. */
+  credentialLogin(options: CredentialLoginOptions): Promise<PortalSession>;
+  /** Restore a (headless) session from persisted cookies for reads / liveness. */
+  restore(storageState: unknown): Promise<PortalSession>;
+  /** Issue an UNAUTHENTICATED request (no session, no cookies, no browser) to a
+   *  public SII endpoint and return the decoded text body. The basis for login-free
+   *  consultas (DTE authorized) — it neither mints nor uses a session (ADR-014). */
+  requestPublic(url: string, options?: PublicRequest): Promise<PublicResponse>;
+}
+
+/** The set of seams a task needs. The composition root (runtime.ts) builds it. */
+export interface Runtime {
+  readonly clock: Clock;
+  readonly audit: AuditSink;
+  readonly store: KeyValueStore;
+  readonly portal: PortalDriver;
+  readonly secrets?: SecretStore;
+}
