@@ -37,7 +37,6 @@ body {
 }
 
 .synthetic-banner {
-  margin: 0 -16px;
   padding: 10px 16px;
   background: var(--media-bg);
   color: var(--media);
@@ -175,6 +174,26 @@ td {
 thead th {
   color: var(--muted);
   font-weight: 500;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.numeric td,
+.numeric thead th {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.numeric th:first-child,
+.numeric td:first-child {
+  padding-left: 0;
+}
+
+.numeric th:last-child,
+.numeric td:last-child {
+  padding-right: 0;
 }
 
 .months {

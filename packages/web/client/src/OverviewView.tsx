@@ -36,7 +36,9 @@ function F29Grid({ overview }: { overview: Overview }) {
         {f29.meses.map((m) => (
           <li key={m.periodo} class={m.tieneDeclaracion ? 'month ok' : 'month missing'}>
             <span class="month-name">{monthLabel(m.periodo)}</span>
-            <span class="month-state">{m.tieneDeclaracion ? (m.estado ?? 'Presentada') : 'Sin declarar'}</span>
+            <span class="month-state">
+              {m.tieneDeclaracion ? (m.estado ?? 'Presentada') : 'Sin declarar'}
+            </span>
             <span class="month-total">{m.tieneDeclaracion ? money(m.total) : ''}</span>
           </li>
         ))}
@@ -86,33 +88,39 @@ function Rcv({ overview }: { overview: Overview }) {
   return (
     <section class="card">
       <h2>Compras y ventas de {monthLabel(iva.periodo)}</h2>
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Documentos</th>
-            <th>Neto</th>
-            <th>IVA</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(({ label, side }) => (
-            <tr key={label}>
-              <th scope="row">{label}</th>
-              <td>{count(side.documentos)}</td>
-              <td>{money(side.neto)}</td>
-              <td>{money(side.iva)}</td>
-              <td>{money(side.total)}</td>
+      <div class="table-wrap">
+        <table class="numeric">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Documentos</th>
+              <th>Neto</th>
+              <th>IVA</th>
+              <th>Total</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map(({ label, side }) => (
+              <tr key={label}>
+                <th scope="row">{label}</th>
+                <td>{count(side.documentos)}</td>
+                <td>{money(side.neto)}</td>
+                <td>{money(side.iva)}</td>
+                <td>{money(side.total)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }
 
-export function OverviewView(props: { overview: Overview | null; busy: boolean; onAudit: () => void }) {
+export function OverviewView(props: {
+  overview: Overview | null;
+  busy: boolean;
+  onAudit: () => void;
+}) {
   if (!props.overview) {
     return (
       <p class="muted">
@@ -134,8 +142,8 @@ export function OverviewView(props: { overview: Overview | null; busy: boolean; 
           Auditar a mi contador
         </button>
         <p class="muted">
-          Revisa meses sin F29, observaciones y giros del SII, retenciones de honorarios y el IVA
-          de los últimos tres meses.
+          Revisa meses sin F29, observaciones y giros del SII, retenciones de honorarios y el IVA de
+          los últimos tres meses.
         </p>
       </div>
     </>

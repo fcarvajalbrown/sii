@@ -65,36 +65,38 @@ export function App() {
     });
 
   return (
-    <div class="page">
+    <>
       {session?.synthetic && (
         <div class="synthetic-banner" role="note">
           Datos sintéticos: contribuyente de demostración, no corresponde a una persona ni empresa
           real.
         </div>
       )}
-      <header class="top">
-        <h1>Tu SII</h1>
-        {screen === 'audit' && (
-          <button class="link" onClick={() => setScreen('overview')} disabled={busy}>
-            Volver a Tu SII
-          </button>
+      <div class="page">
+        <header class="top">
+          <h1>Tu SII</h1>
+          {screen === 'audit' && (
+            <button class="link" onClick={() => setScreen('overview')} disabled={busy}>
+              Volver a Tu SII
+            </button>
+          )}
+        </header>
+        {error && (
+          <p class="error" role="alert">
+            {error}
+          </p>
         )}
-      </header>
-      {error && (
-        <p class="error" role="alert">
-          {error}
-        </p>
-      )}
-      <main>
-        {screen === 'loading' && <p class="muted">Cargando…</p>}
-        {screen === 'login' && session && (
-          <LoginView synthetic={session.synthetic} busy={busy} onLogin={login} />
-        )}
-        {screen === 'overview' && (
-          <OverviewView overview={overview} busy={busy} onAudit={runAudit} />
-        )}
-        {screen === 'audit' && <AuditView report={audit} busy={busy} />}
-      </main>
-    </div>
+        <main>
+          {screen === 'loading' && <p class="muted">Cargando…</p>}
+          {screen === 'login' && session && (
+            <LoginView synthetic={session.synthetic} busy={busy} onLogin={login} />
+          )}
+          {screen === 'overview' && (
+            <OverviewView overview={overview} busy={busy} onAudit={runAudit} />
+          )}
+          {screen === 'audit' && <AuditView report={audit} busy={busy} />}
+        </main>
+      </div>
+    </>
   );
 }
