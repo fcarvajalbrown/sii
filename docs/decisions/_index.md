@@ -51,3 +51,4 @@ Foundational decisions for the TypeScript rewrite. Lineage to the Python
 | 044 | [El bucle se parte en `fetch` (con sesión) y `learn` (desatendido)](044-loop-split-fetch-learn.md) | Accepted | 2026-08-06 |
 | 045 | [Fuentes del corpus de normativa — BCN, circulares SII, instrucciones de llenado](045-normativa-corpus-sourcing.md) | Accepted | 2026-08-06 |
 | 046 | [`extract` descubre artefactos pendientes en el almacén, no en su propia corrida](046-extract-descubre-pendientes.md) | Accepted | 2026-08-10 |
+| 047 | [Demo GUI (`packages/web`) — a local web surface over core tasks](047-demo-gui-web-surface.md) | Accepted | 2026-10-22 |
