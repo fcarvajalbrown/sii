@@ -1,0 +1,28 @@
+{
+  "name": "@dostertags/sii-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local demo GUI for Chile's SII: see your SII, audit your accountant. A localhost web surface over @dostertags/sii-core tasks (ADR-047).",
+  "license": "MIT",
+  "bin": {
+    "sii-web": "./dist/main.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@dostertags/sii-core": "workspace:^",
+    "playwright": "1.61.1"
+  },
+  "devDependencies": {
+    "preact": "10.29.8",
+    "vite": "8.3.4"
+  },
+  "scripts": {
+    "build": "tsc -b && tsc -p client --noEmit && vite build",
+    "build:client": "vite build",
+    "start": "node dist/main.js",
+    "demo": "node dist/main.js --demo"
+  }
+}

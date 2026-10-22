@@ -1,0 +1,237 @@
+{
+  "synthetic": true,
+  "overview": {
+    "situacion": {
+      "rut": "11111111-1",
+      "perfil": {
+        "razonSocial": "Ferretería Demo SpA (datos sintéticos)",
+        "tipoContribuyente": "Persona jurídica",
+        "subtipoContribuyente": null,
+        "segmento": "Pequeña empresa",
+        "glosaActividad": "Venta al por menor de artículos de ferretería",
+        "fechaConstitucion": "2019-03-04 00:00:00.0",
+        "fechaInicioActividades": "2019-03-04 00:00:00.0",
+        "fechaTerminoGiro": null,
+        "autorizadoDeclararDia20": true,
+        "actividades": [
+          {
+            "codigo": "475201",
+            "descripcion": "Venta al por menor de artículos de ferretería y materiales de construcción",
+            "categoriaTributaria": 1,
+            "afectoIva": true,
+            "fechaInicio": "04-03-2019"
+          }
+        ],
+        "timbrajes": [
+          { "codigo": "33", "descripcion": "Factura electrónica", "fechaLegalizacion": "2019-03-10" },
+          { "codigo": "39", "descripcion": "Boleta electrónica", "fechaLegalizacion": "2019-03-10" }
+        ],
+        "conteos": { "socios": 2, "representantes": 1, "direcciones": 1 }
+      },
+      "cumplimiento": {
+        "estado": "Cumple",
+        "semestre": "2026-2",
+        "requisitos": []
+      },
+      "regimenes": [
+        {
+          "codigo": "M14A",
+          "descripcion": "REGIMEN GENERAL SEMI INTEGRADO (14A)",
+          "fechaInicio": "2019-03-04",
+          "fechaTermino": null,
+          "detalle": null
+        }
+      ],
+      "requisitosIncumplidos": []
+    },
+    "f29": {
+      "rut": "11111111-1",
+      "desde": "2025-10",
+      "hasta": "2026-09",
+      "meses": [
+        { "periodo": "2025-10", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000101, "fecha": "2025-11-20", "total": 1284300 },
+        { "periodo": "2025-11", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000102, "fecha": "2025-12-19", "total": 1197650 },
+        { "periodo": "2025-12", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000103, "fecha": "2026-01-20", "total": 1642900 },
+        { "periodo": "2026-01", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000104, "fecha": "2026-02-20", "total": 1023400 },
+        { "periodo": "2026-02", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000105, "fecha": "2026-03-20", "total": 987120 },
+        { "periodo": "2026-03", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000106, "fecha": "2026-04-20", "total": 1105780 },
+        { "periodo": "2026-04", "tieneDeclaracion": false, "estado": null, "folio": null, "fecha": null, "total": null },
+        { "periodo": "2026-05", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000108, "fecha": "2026-06-19", "total": 1210050 },
+        { "periodo": "2026-06", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000109, "fecha": "2026-07-20", "total": 1176300 },
+        { "periodo": "2026-07", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000110, "fecha": "2026-08-20", "total": 1298410 },
+        { "periodo": "2026-08", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000111, "fecha": "2026-09-18", "total": 1341870 },
+        { "periodo": "2026-09", "tieneDeclaracion": true, "estado": "Vigente", "folio": 9100000112, "fecha": "2026-10-20", "total": 1256990 }
+      ]
+    },
+    "f22": {
+      "rut": "11111111-1",
+      "anios": [
+        {
+          "rut": "11111111-1",
+          "anio": "2026",
+          "tieneDeclaracion": true,
+          "declaraciones": [
+            { "folio": "8200000301", "vigente": true, "estado": "Observada", "fecha": "2026-04-28", "tipoImpugnado": null }
+          ]
+        },
+        {
+          "rut": "11111111-1",
+          "anio": "2025",
+          "tieneDeclaracion": true,
+          "declaraciones": [
+            { "folio": "8200000201", "vigente": true, "estado": "Aceptada", "fecha": "2025-04-29", "tipoImpugnado": null }
+          ]
+        },
+        {
+          "rut": "11111111-1",
+          "anio": "2024",
+          "tieneDeclaracion": true,
+          "declaraciones": [
+            { "folio": "8200000101", "vigente": true, "estado": "Aceptada", "fecha": "2024-04-30", "tipoImpugnado": null }
+          ]
+        }
+      ],
+      "aniosConError": []
+    },
+    "iva": {
+      "rut": "11111111-1",
+      "periodo": "2026-09",
+      "fuente": "propuesta",
+      "compras": { "documentos": 84, "neto": 14215000, "exento": 0, "iva": 2700850, "total": 16915850, "porTipo": [] },
+      "ventas": { "documentos": 612, "neto": 20830000, "exento": 0, "iva": 3957700, "total": 24787700, "porTipo": [] },
+      "f29": { "tienePropuesta": true, "debito": 3957700, "credito": 2700850 },
+      "reconciliacion": {
+        "debitoRcv": 3957700,
+        "debitoF29": 3957700,
+        "debitoCodigo": "538",
+        "deltaDebito": 0,
+        "creditoRcv": 2700850,
+        "creditoF29": 2700850,
+        "creditoCodigo": "537",
+        "deltaCredito": 0,
+        "cuadraDebito": true,
+        "cuadraCredito": true,
+        "cuadra": true
+      },
+      "cached": false
+    }
+  },
+  "audit": {
+    "monitor": {
+      "rut": "11111111-1",
+      "baseline": false,
+      "cambios": [
+        {
+          "tipo": "f29_mes_sin_declaracion",
+          "severidad": "alta",
+          "ambito": "F29 2026-04",
+          "detalle": "Sin declaración de F29 para 2026-04."
+        },
+        {
+          "tipo": "observacion_nueva",
+          "severidad": "alta",
+          "ambito": "F22 AT2026",
+          "detalle": "Nueva observación B92: CONTROL DE LOS HONORARIOS DECLARADOS EN EL COD. 1412 DEL F22"
+        },
+        {
+          "tipo": "giro_con_saldo",
+          "severidad": "alta",
+          "ambito": "Giro 7300000451",
+          "detalle": "Giro 7300000451 con saldo 184.320, vence 2026-11-30."
+        }
+      ],
+      "resumen": {
+        "anios": 3,
+        "meses": 12,
+        "observaciones": 1,
+        "eventos": 0,
+        "mesesSinDeclaracion": 1,
+        "aniosSinF22": 0,
+        "peticiones": 0,
+        "djObservadas": 0,
+        "girosConSaldo": 1,
+        "notificacionesVigentes": 0,
+        "cotIncumplidos": 0
+      },
+      "errores": [],
+      "dryRun": true
+    },
+    "honorarios": {
+      "rut": "11111111-1",
+      "anioComercial": "2025",
+      "anioTributario": "2026",
+      "fuente": "propuesta",
+      "meses": [
+        { "periodo": "2025-10", "boletas": 2, "totalHonorarios": 900000, "retencionReceptor": 130500, "retencionEmisor": 0, "bpstBrutos": 0, "bpstRetenido": 0, "f29Retencion": 130500, "delta": 0 },
+        { "periodo": "2025-11", "boletas": 3, "totalHonorarios": 1400000, "retencionReceptor": 203000, "retencionEmisor": 0, "bpstBrutos": 0, "bpstRetenido": 0, "f29Retencion": 101500, "delta": 101500 },
+        { "periodo": "2025-12", "boletas": 2, "totalHonorarios": 900000, "retencionReceptor": 130500, "retencionEmisor": 0, "bpstBrutos": 0, "bpstRetenido": 0, "f29Retencion": 130500, "delta": 0 }
+      ],
+      "totales": {
+        "boletas": 7,
+        "totalHonorarios": 3200000,
+        "retencionReceptor": 464000,
+        "retencionEmisor": 0,
+        "bpstBrutos": 0,
+        "bpstRetenido": 0,
+        "f29Retencion": 362500
+      },
+      "f22": { "anio": "2026", "tieneDeclaracion": true, "folio": "8200000301", "codigos": [] },
+      "reconciliacion": {
+        "retencionBhe": 464000,
+        "retencionBpst": 0,
+        "retencionF29": 362500,
+        "delta": 101500,
+        "cuadra": false,
+        "mesesDescuadrados": ["2025-11"]
+      },
+      "mesesConError": [],
+      "cached": false
+    },
+    "iva": [
+      {
+        "rut": "11111111-1",
+        "periodo": "2026-08",
+        "fuente": "propuesta",
+        "compras": { "documentos": 91, "neto": 15102000, "exento": 0, "iva": 2869380, "total": 17971380, "porTipo": [] },
+        "ventas": { "documentos": 655, "neto": 22146000, "exento": 0, "iva": 4207740, "total": 26353740, "porTipo": [] },
+        "f29": { "tienePropuesta": true, "debito": 4207740, "credito": 2641280 },
+        "reconciliacion": {
+          "debitoRcv": 4207740,
+          "debitoF29": 4207740,
+          "debitoCodigo": "538",
+          "deltaDebito": 0,
+          "creditoRcv": 2869380,
+          "creditoF29": 2641280,
+          "creditoCodigo": "537",
+          "deltaCredito": 228100,
+          "cuadraDebito": true,
+          "cuadraCredito": false,
+          "cuadra": false
+        },
+        "cached": false
+      },
+      {
+        "rut": "11111111-1",
+        "periodo": "2026-09",
+        "fuente": "propuesta",
+        "compras": { "documentos": 84, "neto": 14215000, "exento": 0, "iva": 2700850, "total": 16915850, "porTipo": [] },
+        "ventas": { "documentos": 612, "neto": 20830000, "exento": 0, "iva": 3957700, "total": 24787700, "porTipo": [] },
+        "f29": { "tienePropuesta": true, "debito": 3957700, "credito": 2700850 },
+        "reconciliacion": {
+          "debitoRcv": 3957700,
+          "debitoF29": 3957700,
+          "debitoCodigo": "538",
+          "deltaDebito": 0,
+          "creditoRcv": 2700850,
+          "creditoF29": 2700850,
+          "creditoCodigo": "537",
+          "deltaCredito": 0,
+          "cuadraDebito": true,
+          "cuadraCredito": true,
+          "cuadra": true
+        },
+        "cached": false
+      }
+    ]
+  }
+}
