@@ -104,3 +104,7 @@ export type LoginDestination = typeof HOSTS.miSii;
 export function loginUrl(destination: LoginDestination): string {
   return `${LOGIN_URL}?${destination}`;
 }
+
+export function reachedLoginDestination(url: URL, destination: LoginDestination): boolean {
+  return url.hostname === new URL(destination).hostname;
+}

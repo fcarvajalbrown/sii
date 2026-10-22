@@ -7,7 +7,7 @@
 // reached the destination. The Clave is typed by the user into SII's own page —
 // it never crosses this boundary (cookies-only; ADR-006).
 import type { Browser, BrowserContext, BrowserContextOptions, BrowserType, Page } from 'playwright';
-import { LOGIN_HOST, loginUrl } from '../../config/index.js';
+import { LOGIN_HOST, loginUrl, reachedLoginDestination } from '../../config/index.js';
 import { LoginFailedError } from '../../errors/index.js';
 import { parseSiiLoginError } from '../../auth/login-error.js';
 import { charsetOf, formLoginWallError, nonJsonResponseError } from './response.js';
@@ -196,9 +196,7 @@ export class PlaywrightPortalDriver implements PortalDriver {
       const context = await browser.newContext();
       const page = await context.newPage();
       await page.goto(loginUrl(options.destination), { waitUntil: 'domcontentloaded' });
-      // Login completes when the browser redirects OFF the login host. Window
-      // close or timeout rejects (no partial session is ever written).
-      await page.waitForURL((url) => url.hostname !== LOGIN_HOST, {
+      await page.waitForURL((url) => reachedLoginDestination(url, options.destination), {
         timeout: options.timeoutMs,
       });
       return new PlaywrightPortalSession(browser, context, page);
